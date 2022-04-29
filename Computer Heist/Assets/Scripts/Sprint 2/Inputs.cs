@@ -171,127 +171,6 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
             ]
         },
         {
-            ""name"": ""Inventory"",
-            ""id"": ""46547de0-1a3f-4b6b-8c05-17d0f61a6799"",
-            ""actions"": [
-                {
-                    ""name"": ""Scroll"",
-                    ""type"": ""Value"",
-                    ""id"": ""7e1bba2b-3839-4e31-a07e-4df280eeaf3b"",
-                    ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""Select"",
-                    ""type"": ""Button"",
-                    ""id"": ""bd16213e-4680-42d6-b342-4b2f3fbe2053"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""Throw"",
-                    ""type"": ""Button"",
-                    ""id"": ""84208b6a-d203-4cff-8383-9f2ea258aaf3"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""MousePos"",
-                    ""type"": ""Value"",
-                    ""id"": ""013a8049-d1b7-4bc6-9722-8edf0d7a29d3"",
-                    ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                }
-            ],
-            ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""ab930d6f-105a-46f8-bae5-cd0e9b3ee633"",
-                    ""path"": ""<Keyboard>/1"",
-                    ""interactions"": """",
-                    ""processors"": ""Scale(factor=0)"",
-                    ""groups"": ""Keyboard"",
-                    ""action"": ""Select"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""90e0c997-503c-4247-a56b-c7a666ac6a28"",
-                    ""path"": ""<Keyboard>/2"",
-                    ""interactions"": """",
-                    ""processors"": ""Scale"",
-                    ""groups"": ""Keyboard"",
-                    ""action"": ""Select"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""379c8e6b-9df7-490a-be42-6549262f1630"",
-                    ""path"": ""<Keyboard>/3"",
-                    ""interactions"": """",
-                    ""processors"": ""Scale(factor=2)"",
-                    ""groups"": ""Keyboard"",
-                    ""action"": ""Select"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""2868376d-0fc7-4a85-b10d-f1297378708f"",
-                    ""path"": ""<Keyboard>/4"",
-                    ""interactions"": """",
-                    ""processors"": ""Scale(factor=3)"",
-                    ""groups"": ""Keyboard"",
-                    ""action"": ""Select"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""44113695-1bca-4b7b-937d-0652e29ba287"",
-                    ""path"": ""<Mouse>/scroll"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard"",
-                    ""action"": ""Scroll"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""62c0d174-0a97-4399-8767-ce499b2ff953"",
-                    ""path"": ""<Mouse>/rightButton"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard"",
-                    ""action"": ""Throw"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""3d3de66b-e099-410f-9b1b-a907beb5ed67"",
-                    ""path"": ""<Mouse>/position"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard"",
-                    ""action"": ""MousePos"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                }
-            ]
-        },
-        {
             ""name"": ""Menu"",
             ""id"": ""6b7c60d2-cd61-4b7f-89ce-fd62a98b8f39"",
             ""actions"": [
@@ -343,12 +222,6 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         m_Default = asset.FindActionMap("Default", throwIfNotFound: true);
         m_Default_Movement = m_Default.FindAction("Movement", throwIfNotFound: true);
         m_Default_Interact = m_Default.FindAction("Interact", throwIfNotFound: true);
-        // Inventory
-        m_Inventory = asset.FindActionMap("Inventory", throwIfNotFound: true);
-        m_Inventory_Scroll = m_Inventory.FindAction("Scroll", throwIfNotFound: true);
-        m_Inventory_Select = m_Inventory.FindAction("Select", throwIfNotFound: true);
-        m_Inventory_Throw = m_Inventory.FindAction("Throw", throwIfNotFound: true);
-        m_Inventory_MousePos = m_Inventory.FindAction("MousePos", throwIfNotFound: true);
         // Menu
         m_Menu = asset.FindActionMap("Menu", throwIfNotFound: true);
         m_Menu_Escape = m_Menu.FindAction("Escape", throwIfNotFound: true);
@@ -449,63 +322,6 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     }
     public DefaultActions @Default => new DefaultActions(this);
 
-    // Inventory
-    private readonly InputActionMap m_Inventory;
-    private IInventoryActions m_InventoryActionsCallbackInterface;
-    private readonly InputAction m_Inventory_Scroll;
-    private readonly InputAction m_Inventory_Select;
-    private readonly InputAction m_Inventory_Throw;
-    private readonly InputAction m_Inventory_MousePos;
-    public struct InventoryActions
-    {
-        private @Inputs m_Wrapper;
-        public InventoryActions(@Inputs wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Scroll => m_Wrapper.m_Inventory_Scroll;
-        public InputAction @Select => m_Wrapper.m_Inventory_Select;
-        public InputAction @Throw => m_Wrapper.m_Inventory_Throw;
-        public InputAction @MousePos => m_Wrapper.m_Inventory_MousePos;
-        public InputActionMap Get() { return m_Wrapper.m_Inventory; }
-        public void Enable() { Get().Enable(); }
-        public void Disable() { Get().Disable(); }
-        public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(InventoryActions set) { return set.Get(); }
-        public void SetCallbacks(IInventoryActions instance)
-        {
-            if (m_Wrapper.m_InventoryActionsCallbackInterface != null)
-            {
-                @Scroll.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnScroll;
-                @Scroll.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnScroll;
-                @Scroll.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnScroll;
-                @Select.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelect;
-                @Select.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelect;
-                @Select.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnSelect;
-                @Throw.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnThrow;
-                @Throw.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnThrow;
-                @Throw.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnThrow;
-                @MousePos.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnMousePos;
-                @MousePos.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnMousePos;
-                @MousePos.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnMousePos;
-            }
-            m_Wrapper.m_InventoryActionsCallbackInterface = instance;
-            if (instance != null)
-            {
-                @Scroll.started += instance.OnScroll;
-                @Scroll.performed += instance.OnScroll;
-                @Scroll.canceled += instance.OnScroll;
-                @Select.started += instance.OnSelect;
-                @Select.performed += instance.OnSelect;
-                @Select.canceled += instance.OnSelect;
-                @Throw.started += instance.OnThrow;
-                @Throw.performed += instance.OnThrow;
-                @Throw.canceled += instance.OnThrow;
-                @MousePos.started += instance.OnMousePos;
-                @MousePos.performed += instance.OnMousePos;
-                @MousePos.canceled += instance.OnMousePos;
-            }
-        }
-    }
-    public InventoryActions @Inventory => new InventoryActions(this);
-
     // Menu
     private readonly InputActionMap m_Menu;
     private IMenuActions m_MenuActionsCallbackInterface;
@@ -551,13 +367,6 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
-    }
-    public interface IInventoryActions
-    {
-        void OnScroll(InputAction.CallbackContext context);
-        void OnSelect(InputAction.CallbackContext context);
-        void OnThrow(InputAction.CallbackContext context);
-        void OnMousePos(InputAction.CallbackContext context);
     }
     public interface IMenuActions
     {
