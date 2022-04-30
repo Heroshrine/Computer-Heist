@@ -111,6 +111,7 @@ public class PathFinder
         Debug.Log("No Path");
         return null;
     }
+    public List<PathNode> FindPath(Vector2 start, Vector2 end) => FindPath(Lattice.WorldToLatticePosition(start), Lattice.WorldToLatticePosition(end));
 
     private List<PathNode> TracePath(PathNode node)
     {

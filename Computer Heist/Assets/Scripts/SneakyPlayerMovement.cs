@@ -77,8 +77,7 @@ public class SneakyPlayerMovement : PlayerMovement
         run.canceled -= CancelRun;
     }
 
-    float time;
-
+    private float time;
     void Update()
     {
         time += Time.deltaTime;

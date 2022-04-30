@@ -10,6 +10,9 @@ public class DynamicEnemy : MonoBehaviour
 
     public float viewRadius = 4f;
 
+    public LayerMask playerLayerMask;
+    public LayerMask viewLayerMask;
+
     [Header("PathFinder")]
     public int pathGridWidth;
     public int pathGridHeight;
@@ -32,9 +35,18 @@ public class DynamicEnemy : MonoBehaviour
 
     [Header("Movement")]
     public float movementSpeed = 5f;
-    public float chaseMultiplier = 1.5f;
+    public float chaseMultiplier = 2f;
 
     bool chasing = false;
+    bool stopMoving;
+
+    [Header("Shooting")]
+    public float shootRadius = 2.5f;
+    public float shootSpeed = 0.5f;
+
+    float shootWaitTime;
+
+    Transform shootTarget;
 
     private void Awake()
     {
@@ -45,11 +57,28 @@ public class DynamicEnemy : MonoBehaviour
     {
         rb2d = GetComponent<Rigidbody2D>();
         path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(patrolPoints[nextPatrolPoint]));
+        shootWaitTime = shootSpeed / 1.5f;
     }
 
     private void Update()
     {
-        if (nextNode < path.Count && Vector2.Distance(transform.position, path[nextNode].WorldPosition) <= 0.0025f)
+
+        if (path == null)
+            return;
+
+        if (shootTarget != null)
+        {
+            if (shootWaitTime >= shootSpeed)
+            {
+                Debug.Log("shoot");
+                shootWaitTime = 0;
+            }
+
+            shootWaitTime += Time.deltaTime;
+            return;
+        }
+
+        if (nextNode < path.Count && Vector2.Distance(transform.position, path[nextNode].WorldPosition) <= 0.0035f)
         {
             nextNode++;
             if (nextNode >= path.Count)
@@ -69,7 +98,7 @@ public class DynamicEnemy : MonoBehaviour
                 }
             }
         }
-        else if (searching)
+        else if (searching && !chasing && nextNode >= path.Count)
         {
             searchWaitTime += Time.deltaTime;
             if (searchWaitTime >= searchTime && !chasing)
@@ -83,30 +112,90 @@ public class DynamicEnemy : MonoBehaviour
         }
     }
 
+    private Transform player = null;
     void FixedUpdate()
     {
+        if (path == null)
+            return;
+
+        Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, viewRadius, playerLayerMask);
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (players[i] != null && !players[i].isTrigger)
+            {
+                player = players[i].transform;
+                break;
+            }
+            player = null;
+            shootTarget = null;
+        }
+
+        if (player != null)
+        {
+            Collider2D col = Physics2D.Raycast(transform.position, (player.position - transform.position).normalized, viewRadius, viewLayerMask).collider;
+            if (col != null && col.gameObject.layer == 6)
+            {
+                chasing = true;
+                searching = false;
+                patrolling = false;
+            }
+            else
+            {
+                if (chasing)
+                {
+                    searching = true;
+                }
+                chasing = false;
+                player = null;
+                shootTarget = null;
+            }
+
+            Collider2D[] targets = Physics2D.OverlapCircleAll(transform.position, shootRadius, playerLayerMask);
+            for (int i = 0; i < targets.Length; i++)
+            {
+                if (targets[i] != null && !targets[i].isTrigger && col != null && col.gameObject.layer == 6)
+                {
+                    shootTarget = targets[i].transform;
+                    break;
+                }
+                shootTarget = null;
+            }
+
+            if (shootTarget == null)
+                shootWaitTime = shootSpeed / 1.5f;
+        }
+        else
+        {
+            if (chasing)
+            {
+                searching = true;
+            }
+            chasing = false;
+            player = null;
+            shootTarget = null;
+        }
 
         if (chasing)
         {
-
-        }
-        else if (searching)
-        {
-
+            path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(player.transform.position));
+            nextNode = 1;
         }
 
         float localChaseMultiplier = 1f;
 
-        if (chasing)
+        if (chasing || searching)
             localChaseMultiplier = chaseMultiplier;
 
-        if (nextNode < path.Count)
-            rb2d.MovePosition((Vector2)transform.position + (path[nextNode].WorldPosition - (Vector2)transform.position).normalized * Time.fixedDeltaTime * movementSpeed * chaseMultiplier);
+        if (path == null)
+            path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(transform.position));
+
+        if (nextNode < path.Count && !stopMoving)
+            rb2d.MovePosition((Vector2)transform.position + (path[nextNode].WorldPosition - (Vector2)transform.position).normalized * Time.fixedDeltaTime * movementSpeed * localChaseMultiplier);
     }
 
     public void Alert(Vector2 position)
     {
-        if (searching && nextNode < path.Count)
+        if (chasing || (searching && nextNode < path.Count))
             return;
 
         patrolling = false;
@@ -139,19 +228,29 @@ public class DynamicEnemy : MonoBehaviour
             Gizmos.DrawLine(transform.position, path[nextNode].WorldPosition);
         Gizmos.DrawWireSphere(transform.position, viewRadius);
 
+        if (player != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(transform.position, player.position);
+        }
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, shootRadius);
+
     }
 #endif
 
-    private IEnumerable Search()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        yield return new WaitForSeconds(searchTime);
-
-        if (!chasing)
+        if (collision.gameObject.layer == 6 && !collision.isTrigger && Physics2D.Raycast(transform.position, (collision.transform.position - transform.position).normalized, viewRadius, viewLayerMask).collider != null)
         {
-            searching = false;
-            patrolling = true;
+            stopMoving = true;
         }
-
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == 6 && !collision.isTrigger)
+            stopMoving = false;
     }
 
 }
