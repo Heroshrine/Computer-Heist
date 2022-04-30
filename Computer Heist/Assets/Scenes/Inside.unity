@@ -3863,8 +3863,8 @@ MonoBehaviour:
   chaseMultiplier: 1.5
   shootRadius: 3
   shootSpeed: 0.5
-  showPath: 0
-  showDirection: 0
+  showPath: 1
+  showDirection: 1
   showViewDistance: 0
   showFireRange: 0
 --- !u!50 &1051676766
