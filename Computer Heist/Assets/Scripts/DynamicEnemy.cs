@@ -48,6 +48,12 @@ public class DynamicEnemy : MonoBehaviour
 
     Transform shootTarget;
 
+    [Header("Debug")]
+    public bool showPath = true;
+    public bool showDirection = true;
+    public bool showViewDistance;
+    public bool showFireRange;
+
     private void Awake()
     {
         finder = new PathFinder(pathGridWidth, pathGridHeight, pathGridOrigin);
@@ -212,39 +218,55 @@ public class DynamicEnemy : MonoBehaviour
         if (patrolPoints.Count < 0)
             return;
 
-        Gizmos.color = new Color(255f, 100f / 255f, 0f);
-        for (int i = 0; i < patrolPoints.Count; i++)
+        if (showPath)
         {
-            if (i + 1 < patrolPoints.Count)
+            Gizmos.color = new Color(255f, 100f / 255f, 0f);
+            for (int i = 0; i < patrolPoints.Count; i++)
             {
-                Gizmos.DrawLine(patrolPoints[i], patrolPoints[i + 1]);
+                if (i + 1 < patrolPoints.Count)
+                {
+                    Gizmos.DrawLine(patrolPoints[i], patrolPoints[i + 1]);
+                }
+
+                Gizmos.DrawCube(patrolPoints[i], new Vector3(0.25f, 0.25f, 0.25f));
+
             }
-
-            Gizmos.DrawCube(patrolPoints[i], new Vector3(0.25f, 0.25f, 0.25f));
-
         }
-        Gizmos.color = Color.yellow;
-        if (path != null && nextNode < path.Count && path[nextNode] != null)
-            Gizmos.DrawLine(transform.position, path[nextNode].WorldPosition);
-        Gizmos.DrawWireSphere(transform.position, viewRadius);
 
-        if (player != null)
+        if (showDirection)
+        {
+            Gizmos.color = Color.yellow;
+            if (path != null && nextNode < path.Count && path[nextNode] != null)
+                Gizmos.DrawLine(transform.position, path[nextNode].WorldPosition);
+        }
+
+        if (showViewDistance)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, viewRadius);
+        }
+
+        if (player != null && showFireRange)
         {
             Gizmos.color = Color.red;
             Gizmos.DrawLine(transform.position, player.position);
         }
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, shootRadius);
-
+        if (showFireRange)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, shootRadius);
+        }
     }
 #endif
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == 6 && !collision.isTrigger && Physics2D.Raycast(transform.position, (collision.transform.position - transform.position).normalized, viewRadius, viewLayerMask).collider != null)
+        if (collision.gameObject.layer == 6 && !collision.isTrigger)
         {
-            stopMoving = true;
+            Collider2D col = Physics2D.Raycast(transform.position, (collision.transform.position - transform.position).normalized, viewRadius, viewLayerMask).collider;
+            if (col != null && col.gameObject.layer == 6)
+                stopMoving = true;
         }
     }
     private void OnTriggerExit2D(Collider2D collision)

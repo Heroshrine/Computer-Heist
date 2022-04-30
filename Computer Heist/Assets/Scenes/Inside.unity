@@ -3823,6 +3823,7 @@ GameObject:
   - component: {fileID: 1051676766}
   - component: {fileID: 1051676765}
   - component: {fileID: 1051676769}
+  - component: {fileID: 1051676770}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: dynamicEnemy
@@ -3842,7 +3843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e106bdf11a295e2499dfb988c32d11ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadius: 3.5
+  viewRadius: 4.5
   playerLayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -3860,6 +3861,12 @@ MonoBehaviour:
   - {x: 20.6, y: 14.7}
   movementSpeed: 2
   chaseMultiplier: 1.5
+  shootRadius: 3
+  shootSpeed: 0.5
+  showPath: 0
+  showDirection: 0
+  showViewDistance: 0
+  showFireRange: 0
 --- !u!50 &1051676766
 Rigidbody2D:
   serializedVersion: 4
@@ -3873,7 +3880,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
+  m_LinearDrag: 1000
   m_AngularDrag: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
@@ -3964,6 +3971,22 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
+--- !u!58 &1051676770
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1051676764}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 1.75
 --- !u!1 &1088917425
 GameObject:
   m_ObjectHideFlags: 0
