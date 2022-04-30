@@ -58,6 +58,7 @@ public class Lattice2D<TCell> : IEnumerable<TCell>
                 }
             }
         }
+
         throw new System.InvalidOperationException("The TCell " + cell + " was not found in the lattice!");
     }
     public bool Contains(TCell cell)
@@ -79,33 +80,33 @@ public class Lattice2D<TCell> : IEnumerable<TCell>
             action(cell);
     }
 
-    public Vector2Int WorldToLatticePoint(Vector2 worldPoint)
+    public Vector2Int WorldToLatticePosition(Vector2 worldPosition)
     {
-        Vector2Int result = new Vector2Int(Mathf.FloorToInt(worldPoint.x - Origin.x), Mathf.FloorToInt(worldPoint.y - Origin.y));
+        Vector2Int result = new Vector2Int(Mathf.FloorToInt(worldPosition.x - Origin.x), Mathf.FloorToInt(worldPosition.y - Origin.y));
 
         if (result.x < 0 || result.x > Width || result.y < 0 || result.y > Height)
-            throw new System.IndexOutOfRangeException("The world point was not part of the lattice!");
+            throw new System.IndexOutOfRangeException("The world position was not part of the lattice!");
 
         return result;
 
     }
-    public Vector2 LatticeToWorldPoint(Vector2Int latticePoint)
+    public Vector2 LatticeToWorldPosition(Vector2Int latticePosition)
     {
-        if (latticePoint.x < 0 || latticePoint.x > Width || latticePoint.y < 0 || latticePoint.y > Height)
-            throw new System.IndexOutOfRangeException("The lattice point was not part of the lattice!");
+        if (latticePosition.x < 0 || latticePosition.x > Width || latticePosition.y < 0 || latticePosition.y > Height)
+            throw new System.IndexOutOfRangeException("The lattice position was not part of the lattice!");
 
-        return new Vector2(latticePoint.x + Origin.x + 0.5f, latticePoint.y + Origin.y + 0.5f);
+        return new Vector2(latticePosition.x + Origin.x + 0.5f, latticePosition.y + Origin.y + 0.5f);
     }
-    public Vector2 LatticeToWorldPoint(int x, int y)
+    public Vector2 LatticeToWorldPosition(int x, int y)
     {
         if (x < 0 || x > Width || y < 0 || y > Height)
-            throw new System.IndexOutOfRangeException("The lattice point was not part of the lattice!");
+            throw new System.IndexOutOfRangeException("The lattice position was not part of the lattice!");
 
         return new Vector2(x + Origin.x + 0.5f, y + Origin.y + 0.5f);
     }
-    public static Vector2 RoundToLatticeWorldPoint(Vector2 worldPoint) => new Vector2(Mathf.Floor(worldPoint.x) + 0.5f, Mathf.Floor(worldPoint.y) + 0.5f);
+    public static Vector2 RoundToLatticeWorldPosition(Vector2 worldPosition) => new Vector2(Mathf.Floor(worldPosition.x) + 0.5f, Mathf.Floor(worldPosition.y) + 0.5f);
 
-    public bool Add(TCell cell, int x, int y)
+    public bool TrySetCell(TCell cell, int x, int y)
     {
         if (!EqualityComparer<TCell>.Default.Equals(Cells[x, y], cell))
         {
@@ -116,7 +117,7 @@ public class Lattice2D<TCell> : IEnumerable<TCell>
             return false;
     }
 
-    public void ForceAdd(TCell cell, int x, int y)
+    public void SetCell(TCell cell, int x, int y)
     {
         Cells[x, y] = cell;
     }
