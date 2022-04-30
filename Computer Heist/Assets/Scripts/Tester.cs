@@ -18,14 +18,14 @@ public class Tester : MonoBehaviour
         Debug.Log("Path:");
 
         System.DateTime start = System.DateTime.Now;
-        List<PathNode> pathNodes = pathFinder.FindPath(pathFinder.lattice.GetCell(firstNode.x, firstNode.y), pathFinder.lattice.GetCell(lastNode.x, lastNode.y));
+        List<PathNode> pathNodes = pathFinder.FindPath(pathFinder.Lattice.GetCell(firstNode.x, firstNode.y), pathFinder.Lattice.GetCell(lastNode.x, lastNode.y));
         System.DateTime end = System.DateTime.Now;
 
         pathNodes.ForEach(x => Debug.Log(x));
 
         List<Debugger> generated = new List<Debugger>();
 
-        pathFinder.lattice.ForEach(x =>
+        pathFinder.Lattice.ForEach(x =>
         {
             GameObject n = new GameObject();
             Debugger dn = n.AddComponent<Debugger>();

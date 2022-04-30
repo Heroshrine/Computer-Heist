@@ -44,6 +44,7 @@ public class Lattice2D<TCell> : IEnumerable<TCell>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public TCell GetCell(int x, int y) => Cells[x, y];
+    public TCell GetCell(Vector2Int pos) => Cells[pos.x, pos.y];
     public TCell GetPosition(TCell cell, out int x, out int y)
     {
         for (int xw = 0; xw < Width; xw++)

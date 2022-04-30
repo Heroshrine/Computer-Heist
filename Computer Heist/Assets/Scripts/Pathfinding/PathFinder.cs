@@ -10,61 +10,49 @@ public class PathFinder
 {
     public Lattice2D<bool> wallLattice { get; private set; }
 
-    public readonly Lattice2D<PathNode> lattice;
+    public readonly Lattice2D<PathNode> Lattice;
 
     public int maxPathLength = byte.MaxValue;
 
     public PathFinder(int width, int height)
     {
-        lattice = new Lattice2D<PathNode>(width, height);
+        Lattice = new Lattice2D<PathNode>(width, height);
 
-        for (int x = 0; x < lattice.Width; x++)
-        {
-            for (int y = 0; y < lattice.Height; y++)
-            {
-                lattice[x, y] = new PathNode(this, lattice, x, y);
-                lattice[x, y].GCost = PathNode.VERY_LARGE;
-            }
-        }
+        ResetLattice();
 
         CreateWalls();
-
-        for (int x = 0; x < wallLattice.Width; x++)
-        {
-            for (int y = 0; y < wallLattice.Height; y++)
-            {
-                if (wallLattice[x, y])
-                    Debug.Log(wallLattice[x, y] + " " + x + " " + y);
-            }
-        }
-
     }
 
     public PathFinder(int width, int height, Vector2 origin)
     {
-        lattice = new Lattice2D<PathNode>(width, height, origin);
+        Lattice = new Lattice2D<PathNode>(width, height, origin);
 
-        for (int x = 0; x < lattice.Width; x++)
-        {
-            for (int y = 0; y < lattice.Height; y++)
-            {
-                lattice[x, y] = new PathNode(this, lattice, x, y);
-                lattice[x, y].GCost = PathNode.VERY_LARGE;
-            }
-        }
+        ResetLattice();
 
         CreateWalls();
     }
 
+    public void ResetLattice()
+    {
+        for (int x = 0; x < Lattice.Width; x++)
+        {
+            for (int y = 0; y < Lattice.Height; y++)
+            {
+                Lattice[x, y] = new PathNode(this, Lattice, x, y);
+                Lattice[x, y].GCost = PathNode.VERY_LARGE;
+            }
+        }
+    }
+
     private void CreateWalls()
     {
-        wallLattice = new Lattice2D<bool>(lattice.Width, lattice.Height, lattice.Origin);
+        wallLattice = new Lattice2D<bool>(Lattice.Width, Lattice.Height, Lattice.Origin);
 
-        for (int x = 0; x < lattice.Width; x++)
+        for (int x = 0; x < Lattice.Width; x++)
         {
-            for (int y = 0; y < lattice.Height; y++)
+            for (int y = 0; y < Lattice.Height; y++)
             {
-                Collider2D[] cols = Physics2D.OverlapBoxAll(lattice[x, y].WorldPosition, new Vector2(0.5f, 0.5f), 0f);
+                Collider2D[] cols = Physics2D.OverlapBoxAll(Lattice[x, y].WorldPosition, new Vector2(0.5f, 0.5f), 0f);
 
                 for (int i = 0; i < cols.Length; i++)
                 {
@@ -80,6 +68,7 @@ public class PathFinder
 
     public List<PathNode> FindPath(PathNode start, PathNode end)
     {
+        System.DateTime startTime = System.DateTime.Now;
         start.GCost = 0;
         start.HCost = PathNode.FindDistanceCost(start, end);
 
@@ -91,7 +80,13 @@ public class PathFinder
             PathNode current = PathNode.FindCheapestNode(open);
 
             if (current == end)
+            {
+                ResetLattice();
+
+                System.DateTime endTime = System.DateTime.Now;
+                Debug.Log("It took " + endTime.Subtract(startTime).Milliseconds + " milliseconds to find a path.");
                 return TracePath(end);
+            }
 
             open.Remove(current);
             closed.Add(current);
@@ -138,4 +133,8 @@ public class PathFinder
         results.Reverse();
         return results;
     }
+
+    public PathNode GetNode(Vector2 worldPosition) => Lattice.GetCell(Lattice.WorldToLatticePosition(worldPosition));
+    public PathNode GetNode(Vector2Int latticePosition) => Lattice.GetCell(latticePosition);
+    public PathNode GetNode(int x, int y) => Lattice.GetCell(x, y);
 }
