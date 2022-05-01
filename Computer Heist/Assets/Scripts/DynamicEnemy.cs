@@ -117,20 +117,20 @@ public class DynamicEnemy : MonoBehaviour
                 {
                     if (reachedPatrolPointWaitTime < reachedPatrolPointTime)
                     {
-                        reachedPatrolPointWaitTime += Time.deltaTime;
                         nextNode--;
+                        reachedPatrolPointWaitTime += Time.deltaTime;
                         waiting = true;
                         transform.position = path[nextNode].WorldPosition;
                         return;
                     }
 
                     nextPatrolPoint++;
-                    nextNode = 0;
 
                     if (nextPatrolPoint >= patrolPoints.Count)
                     {
                         if (endOfRouteWaitTime < endOfRouteTime)
                         {
+                            nextNode--;
                             endOfRouteWaitTime += Time.deltaTime;
                             nextPatrolPoint--;
                             waiting = true;
@@ -144,6 +144,7 @@ public class DynamicEnemy : MonoBehaviour
 
                     reachedPatrolPointWaitTime = 0;
                     endOfRouteWaitTime = 0;
+                    nextNode = 0;
                     waiting = false;
                     path = finder.FindPath(finder.GetNode(patrolPoints[nextPatrolPoint - 1]), finder.GetNode(patrolPoints[nextPatrolPoint]));
                 }
