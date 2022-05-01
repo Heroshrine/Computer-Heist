@@ -129,7 +129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraBehavior: 2
-  alertRadius: 7
+  alertRadius: 6.5
   alertRepeatTime: 0.3
   cameraSpeed: 20
   minRotationAngle: -60

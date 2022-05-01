@@ -5,6 +5,8 @@ using Unity.VisualScripting;
 
 using UnityEngine;
 
+using static UnityEngine.GraphicsBuffer;
+
 [RequireComponent(typeof(Rigidbody2D))]
 public class DynamicEnemy : MonoBehaviour
 {
@@ -14,6 +16,8 @@ public class DynamicEnemy : MonoBehaviour
 
     public LayerMask playerLayerMask;
     public LayerMask viewLayerMask;
+
+    private Transform player = null;
 
     [Header("PathFinder")]
     public int pathGridWidth;
@@ -56,6 +60,9 @@ public class DynamicEnemy : MonoBehaviour
     [Header("Shooting")]
     public float shootRadius = 2.5f;
     public float shootSpeed = 0.5f;
+    public float shotVelocity = 4f;
+
+    public Bullet bullet;
 
     float shootWaitTime;
 
@@ -94,6 +101,7 @@ public class DynamicEnemy : MonoBehaviour
         {
             if (shootWaitTime >= shootSpeed)
             {
+                Shoot();
                 Debug.Log("shoot");
                 shootWaitTime = 0;
             }
@@ -164,7 +172,6 @@ public class DynamicEnemy : MonoBehaviour
         }
     }
 
-    private Transform player = null;
     void FixedUpdate()
     {
         if (path == null)
@@ -273,6 +280,16 @@ public class DynamicEnemy : MonoBehaviour
         else
             nextNode = 0;
 
+    }
+
+    public void Shoot()
+    {
+        if (shootTarget == null)
+            return;
+
+        Bullet newBullet = Instantiate(bullet, (transform.position + (shootTarget.position - transform.position).normalized / 2f), transform.rotation);
+        newBullet.transform.right = shootTarget.position - newBullet.transform.position;
+        newBullet.bulletSpeed = shotVelocity;
     }
 
 #if UNITY_EDITOR

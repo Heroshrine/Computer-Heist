@@ -120,7 +120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e106bdf11a295e2499dfb988c32d11ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadius: 4
+  viewRadius: 5
   playerLayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -133,7 +133,7 @@ MonoBehaviour:
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 136
-  searchTime: 2
+  searchTime: 2.5
   endOfRouteTime: 1.25
   reachedPatrolPointTime: 0
   patrolPoints:
@@ -141,9 +141,11 @@ MonoBehaviour:
   - {x: -2, y: 0}
   movementSpeed: 2
   chaseMultiplier: 2.25
-  stopDistance: 1.25
+  stopDistance: 1.6
   shootRadius: 3
-  shootSpeed: 0.5
+  shootSpeed: 2
+  shotVelocity: 12
+  bullet: {fileID: 4308717034714250179, guid: a3f70c2f422828942b6d71666b566f6f, type: 3}
   showPath: 1
   showDirection: 1
   showViewDistance: 0

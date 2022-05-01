@@ -36,9 +36,6 @@ public class SecurityCamera : MonoBehaviour
         alertRepeatWaitTime = alertRepeatTime / 1.1f;
         startingRotation = transform.rotation;
 
-        minRotationAngle += transform.rotation.eulerAngles.z;
-        maxRotationAngle += transform.rotation.eulerAngles.z;
-
         nextRotation = Quaternion.Euler(new Vector3(0, 0, maxRotationAngle));
     }
 
@@ -121,7 +118,7 @@ public class SecurityCamera : MonoBehaviour
             angleStopWaitTime += Time.deltaTime;
         }
 
-        transform.localRotation = Quaternion.RotateTowards(transform.rotation, nextRotation, Time.deltaTime * cameraSpeed);
+        transform.localRotation = Quaternion.RotateTowards(transform.localRotation, nextRotation, Time.deltaTime * cameraSpeed);
     }
 
 #if UNITY_EDITOR

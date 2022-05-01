@@ -171,6 +171,11 @@ public class SneakyPlayerMovement : PlayerMovement
         }
     }
 
+    public void Damage()
+    {
+        Debug.Log("Take Damage");
+    }
+
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
