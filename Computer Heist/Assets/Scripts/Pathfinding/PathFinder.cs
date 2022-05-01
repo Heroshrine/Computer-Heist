@@ -8,24 +8,28 @@ using UnityEngine.SceneManagement;
 
 public class PathFinder
 {
-    public Lattice2D<bool> wallLattice { get; private set; }
+    public Lattice2D<bool> WallLattice { get; private set; }
 
     public readonly Lattice2D<PathNode> Lattice;
 
     public int maxPathLength = byte.MaxValue;
 
-    public PathFinder(int width, int height)
+    private LayerMask wallLayerMask;
+
+    public PathFinder(int width, int height, LayerMask wallLayerMask)
     {
         Lattice = new Lattice2D<PathNode>(width, height);
+        this.wallLayerMask = wallLayerMask;
 
         ResetLattice();
 
         CreateWalls();
     }
 
-    public PathFinder(int width, int height, Vector2 origin)
+    public PathFinder(int width, int height, LayerMask wallLayerMask, Vector2 origin)
     {
         Lattice = new Lattice2D<PathNode>(width, height, origin);
+        this.wallLayerMask = wallLayerMask;
 
         ResetLattice();
 
@@ -46,19 +50,19 @@ public class PathFinder
 
     private void CreateWalls()
     {
-        wallLattice = new Lattice2D<bool>(Lattice.Width, Lattice.Height, Lattice.Origin);
+        WallLattice = new Lattice2D<bool>(Lattice.Width, Lattice.Height, Lattice.Origin);
 
         for (int x = 0; x < Lattice.Width; x++)
         {
             for (int y = 0; y < Lattice.Height; y++)
             {
-                Collider2D[] cols = Physics2D.OverlapBoxAll(Lattice[x, y].WorldPosition, new Vector2(0.5f, 0.5f), 0f);
+                Collider2D[] cols = Physics2D.OverlapBoxAll(Lattice[x, y].WorldPosition, new Vector2(0.5f, 0.5f), 0f, wallLayerMask);
 
                 for (int i = 0; i < cols.Length; i++)
                 {
-                    if (!cols[i].isTrigger && cols[i].gameObject.layer == 3)
+                    if (!cols[i].isTrigger)
                     {
-                        wallLattice[x, y] = true;
+                        WallLattice[x, y] = true;
                         break;
                     }
                 }

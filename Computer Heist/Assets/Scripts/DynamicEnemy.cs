@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using Unity.VisualScripting;
+
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -18,13 +20,19 @@ public class DynamicEnemy : MonoBehaviour
     public int pathGridHeight;
     [Tooltip("The bottom left of the pathfinder's grid")]
     public Vector2 pathGridOrigin;
+    public LayerMask wallLayerMask;
 
     PathFinder finder;
     List<PathNode> path;
     int nextNode;
 
     [Header("Patrolling")]
-    public float searchTime = 2;
+    public float searchTime = 2f;
+    [Tooltip("How long the enemy will wait at the end of their patrol before continuing. Additive with endOfRoutTime.")]
+    public float endOfRouteTime = 0f;
+    [Tooltip("How long the enemy will wait at each patrol point")]
+    public float reachedPatrolPointTime = 0f;
+
     public List<Vector2> patrolPoints;
 
     int nextPatrolPoint;
@@ -33,9 +41,14 @@ public class DynamicEnemy : MonoBehaviour
     float searchWaitTime;
     bool searching;
 
+    float endOfRouteWaitTime;
+    float reachedPatrolPointWaitTime;
+    bool waiting;
+
     [Header("Movement")]
     public float movementSpeed = 5f;
     public float chaseMultiplier = 2f;
+    public float stopDistance = 1.25f;
 
     bool chasing = false;
     bool stopMoving;
@@ -53,10 +66,11 @@ public class DynamicEnemy : MonoBehaviour
     public bool showDirection = true;
     public bool showViewDistance;
     public bool showFireRange;
+    public bool showStopDistance;
 
     private void Awake()
     {
-        finder = new PathFinder(pathGridWidth, pathGridHeight, pathGridOrigin);
+        finder = new PathFinder(pathGridWidth, pathGridHeight, wallLayerMask, pathGridOrigin);
     }
 
     void Start()
@@ -68,9 +82,13 @@ public class DynamicEnemy : MonoBehaviour
 
     private void Update()
     {
-
-        if (path == null)
-            return;
+        if (player != null)
+        {
+            if (Vector2.Distance(transform.position, player.position) <= stopDistance)
+                stopMoving = true;
+            else if (stopMoving)
+                StartCoroutine(StartMoving());
+        }
 
         if (shootTarget != null)
         {
@@ -84,6 +102,12 @@ public class DynamicEnemy : MonoBehaviour
             return;
         }
 
+        if (path == null)
+        {
+            path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(transform.position));
+            nextNode = 0;
+        }
+
         if (nextNode < path.Count && Vector2.Distance(transform.position, path[nextNode].WorldPosition) <= 0.0035f)
         {
             nextNode++;
@@ -91,15 +115,36 @@ public class DynamicEnemy : MonoBehaviour
             {
                 if (patrolling)
                 {
+                    if (reachedPatrolPointWaitTime < reachedPatrolPointTime)
+                    {
+                        reachedPatrolPointWaitTime += Time.deltaTime;
+                        nextNode--;
+                        waiting = true;
+                        transform.position = path[nextNode].WorldPosition;
+                        return;
+                    }
+
                     nextPatrolPoint++;
                     nextNode = 0;
 
                     if (nextPatrolPoint >= patrolPoints.Count)
                     {
+                        if (endOfRouteWaitTime < endOfRouteTime)
+                        {
+                            endOfRouteWaitTime += Time.deltaTime;
+                            nextPatrolPoint--;
+                            waiting = true;
+                            transform.position = path[nextNode].WorldPosition;
+                            return;
+                        }
+
                         patrolPoints.Reverse();
                         nextPatrolPoint = 1;
                     }
 
+                    reachedPatrolPointWaitTime = 0;
+                    endOfRouteWaitTime = 0;
+                    waiting = false;
                     path = finder.FindPath(finder.GetNode(patrolPoints[nextPatrolPoint - 1]), finder.GetNode(patrolPoints[nextPatrolPoint]));
                 }
             }
@@ -122,7 +167,10 @@ public class DynamicEnemy : MonoBehaviour
     void FixedUpdate()
     {
         if (path == null)
-            return;
+        {
+            path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(transform.position));
+            nextNode = 0;
+        }
 
         Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, viewRadius, playerLayerMask);
         for (int i = 0; i < players.Length; i++)
@@ -144,16 +192,20 @@ public class DynamicEnemy : MonoBehaviour
                 chasing = true;
                 searching = false;
                 patrolling = false;
+                waiting = false;
+                player.GetComponent<SneakyPlayerMovement>().seen = true;
             }
-            else
+            else if (!patrolling)
             {
                 if (chasing)
-                {
                     searching = true;
-                }
+
+                player.GetComponent<SneakyPlayerMovement>().seen = false;
+
                 chasing = false;
                 player = null;
                 shootTarget = null;
+                waiting = false;
             }
 
             Collider2D[] targets = Physics2D.OverlapCircleAll(transform.position, shootRadius, playerLayerMask);
@@ -184,7 +236,14 @@ public class DynamicEnemy : MonoBehaviour
         if (chasing)
         {
             path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(player.transform.position));
-            nextNode = 1;
+
+            if (path == null)
+                return;
+
+            if (path.Count > 1)
+                nextNode = 1;
+            else
+                nextNode = 0;
         }
 
         float localChaseMultiplier = 1f;
@@ -195,20 +254,23 @@ public class DynamicEnemy : MonoBehaviour
         if (path == null)
             path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(transform.position));
 
-        if (nextNode < path.Count && !stopMoving)
+        if (nextNode < path.Count && !stopMoving && !waiting)
             rb2d.MovePosition((Vector2)transform.position + (path[nextNode].WorldPosition - (Vector2)transform.position).normalized * Time.fixedDeltaTime * movementSpeed * localChaseMultiplier);
     }
 
     public void Alert(Vector2 position)
     {
-        if (chasing || (searching && nextNode < path.Count))
+        if (chasing) //(searching && nextNode < path.Count)
             return;
 
         patrolling = false;
         searching = true;
 
         path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(position));
-        nextNode = 0;
+        if (path.Count > 1)
+            nextNode = 1;
+        else
+            nextNode = 0;
 
     }
 
@@ -233,13 +295,6 @@ public class DynamicEnemy : MonoBehaviour
             }
         }
 
-        if (showDirection)
-        {
-            Gizmos.color = Color.yellow;
-            if (path != null && nextNode < path.Count && path[nextNode] != null)
-                Gizmos.DrawLine(transform.position, path[nextNode].WorldPosition);
-        }
-
         if (showViewDistance)
         {
             Gizmos.color = Color.yellow;
@@ -257,22 +312,29 @@ public class DynamicEnemy : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, shootRadius);
         }
+
+        if (showStopDistance)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, stopDistance);
+        }
+
+        if (showDirection && path != null && nextNode < path.Count && path[nextNode] != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(transform.position, path[nextNode].WorldPosition);
+            Gizmos.color = new Color(1f, 215f / 255f, 0f, 0.8f);
+            Gizmos.DrawLine(transform.position, path[^1].WorldPosition);
+        }
     }
 #endif
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private IEnumerator StartMoving()
     {
-        if (collision.gameObject.layer == 6 && !collision.isTrigger)
-        {
-            Collider2D col = Physics2D.Raycast(transform.position, (collision.transform.position - transform.position).normalized, viewRadius, viewLayerMask).collider;
-            if (col != null && col.gameObject.layer == 6)
-                stopMoving = true;
-        }
-    }
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.gameObject.layer == 6 && !collision.isTrigger)
+        yield return new WaitForSeconds(0.4f);
+        if (player != null && Vector2.Distance(transform.position, player.position) > stopDistance)
+            stopMoving = false;
+        else if (player == null)
             stopMoving = false;
     }
-
 }

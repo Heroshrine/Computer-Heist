@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
         movement.canceled += CancelMovement;
     }
 
-    protected void OnMovement(InputAction.CallbackContext cb)
+    protected virtual void OnMovement(InputAction.CallbackContext cb)
     {
         if (Time.timeScale == 0)
             return;
@@ -94,7 +94,7 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
     }
-    protected void CancelMovement(InputAction.CallbackContext cb)
+    protected virtual void CancelMovement(InputAction.CallbackContext cb)
     {
         moveVector = Vector2.zero;
         if (anim != null)

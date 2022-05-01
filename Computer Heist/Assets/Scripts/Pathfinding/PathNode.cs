@@ -80,68 +80,15 @@ public class PathNode
             "on lattice: " + lattice.name;
     }
 
-    /*/
-    public List<PathNode> FindPath(PathNode start, PathNode end)
+    public List<PathNode> FindPath(PathNode end)
     {
-        start.GCost = 0;
-        start.HCost = FindDistanceCost(start, end);
-
-        List<PathNode> open = new List<PathNode>() { start };
-        HashSet<PathNode> closed = new HashSet<PathNode>();
-
-        while (open.Count > 0)
+        if (lattice.Contains(end))
         {
-            PathNode current = FindCheapestNode(open);
-
-            if (current == end)
-                return TracePath(end);
-
-            open.Remove(current);
-            closed.Add(current);
-
-            foreach (PathNode border in GetBorderingNodes(current))
-            {
-                if (closed.Contains(border))
-                    continue;
-
-                int newGCost = current.GCost + FindDistanceCost(current, border);
-                if (newGCost < border.GCost)
-                {
-                    border.previous = current;
-                    border.GCost = newGCost;
-                    border.HCost = FindDistanceCost(border, end);
-
-                    if (!open.Contains(border))
-                        open.Add(border);
-                }
-            }
+            return Finder.FindPath(this, end);
         }
-        return null;
+        else
+            throw new System.ArgumentException("The lattice did not contain the path node");
     }
-    /*/
-    /*/
-    private List<PathNode> TracePath(PathNode node)
-    {
-        List<PathNode> results = new List<PathNode>();
-        results.Add(node);
-        int attempts = 0;
-
-        while (node.previous != null)
-        {
-            results.Add(node.previous);
-            node = node.previous;
-
-            if (attempts > Finder.maxPathLength)
-            {
-                Debug.LogError("There was a loop in the pathfinding!");
-                return null;
-            }
-            attempts++;
-        }
-        results.Reverse();
-        return results;
-    }
-    /*/
 
     public static PathNode FindCheapestNode(List<PathNode> nodes)
     {
@@ -158,29 +105,29 @@ public class PathNode
     {
         HashSet<PathNode> results = new HashSet<PathNode>();
 
-        if (node.x + 1 < lattice.Width && !Finder.wallLattice.GetCell(node.x + 1, node.y))
+        if (node.x + 1 < lattice.Width && !Finder.WallLattice.GetCell(node.x + 1, node.y))
         {
             results.Add(lattice.GetCell(node.x + 1, node.y));
 
-            if (node.y + 1 < lattice.Height && !Finder.wallLattice.GetCell(node.x + 1, node.y + 1) && !Finder.wallLattice.GetCell(node.x, node.y + 1))
+            if (node.y + 1 < lattice.Height && !Finder.WallLattice.GetCell(node.x + 1, node.y + 1) && !Finder.WallLattice.GetCell(node.x, node.y + 1))
                 results.Add(lattice.GetCell(node.x + 1, node.y + 1));
-            if (node.y - 1 >= 0 && !Finder.wallLattice.GetCell(node.x + 1, node.y - 1) && !Finder.wallLattice.GetCell(node.x, node.y - 1))
+            if (node.y - 1 >= 0 && !Finder.WallLattice.GetCell(node.x + 1, node.y - 1) && !Finder.WallLattice.GetCell(node.x, node.y - 1))
                 results.Add(lattice.GetCell(node.x + 1, node.y - 1));
         }
 
-        if (node.x - 1 >= 0 && !Finder.wallLattice.GetCell(node.x - 1, node.y))
+        if (node.x - 1 >= 0 && !Finder.WallLattice.GetCell(node.x - 1, node.y))
         {
             results.Add(lattice.GetCell(node.x - 1, node.y));
 
-            if (node.y + 1 < lattice.Height && !Finder.wallLattice.GetCell(node.x - 1, node.y + 1) && !Finder.wallLattice.GetCell(node.x, node.y + 1))
+            if (node.y + 1 < lattice.Height && !Finder.WallLattice.GetCell(node.x - 1, node.y + 1) && !Finder.WallLattice.GetCell(node.x, node.y + 1))
                 results.Add(lattice.GetCell(node.x - 1, node.y + 1));
-            if (node.y - 1 >= 0 && !Finder.wallLattice.GetCell(node.x - 1, node.y - 1) && !Finder.wallLattice.GetCell(node.x, node.y - 1))
+            if (node.y - 1 >= 0 && !Finder.WallLattice.GetCell(node.x - 1, node.y - 1) && !Finder.WallLattice.GetCell(node.x, node.y - 1))
                 results.Add(lattice.GetCell(node.x - 1, node.y - 1));
         }
 
-        if (node.y + 1 < lattice.Height && !Finder.wallLattice.GetCell(node.x, node.y + 1))
+        if (node.y + 1 < lattice.Height && !Finder.WallLattice.GetCell(node.x, node.y + 1))
             results.Add(lattice.GetCell(node.x, node.y + 1));
-        if (node.y - 1 >= 0 && !Finder.wallLattice.GetCell(node.x, node.y - 1))
+        if (node.y - 1 >= 0 && !Finder.WallLattice.GetCell(node.x, node.y - 1))
             results.Add(lattice.GetCell(node.x, node.y - 1));
         return results;
     }
