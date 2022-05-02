@@ -18,16 +18,16 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     public Transform NewPosition { set { transform.position = value.position; } }
 
-    Inputs inputs;
-    Inputs.DefaultActions defaultActions;
+    protected Inputs inputs;
+    protected Inputs.DefaultActions defaultActions;
 
     [Header("Movement")]
     [Tooltip("Higher number is slower but smoother movement")]
     public float movementSmoothingMultiplier = 1f;
 
-    Vector2 moveVector;
+    protected Vector2 moveVector;
 
-    Rigidbody2D rb2d;
+    protected Rigidbody2D rb2d;
     InputAction movement;
 
     [Header("Animations")]
@@ -42,7 +42,7 @@ public class PlayerMovement : MonoBehaviour
 
     Animator anim;
 
-    private void Awake()
+    protected void Awake()
     {
         Instance = this;
 
@@ -51,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
         movement = defaultActions.Movement;
     }
 
-    private void OnEnable()
+    protected void OnEnable()
     {
         inputs.Enable();
         defaultActions.Enable();
@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
         movement.canceled += CancelMovement;
     }
 
-    private void OnMovement(InputAction.CallbackContext cb)
+    protected virtual void OnMovement(InputAction.CallbackContext cb)
     {
         if (Time.timeScale == 0)
             return;
@@ -94,27 +94,27 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
     }
-    private void CancelMovement(InputAction.CallbackContext cb)
+    protected virtual void CancelMovement(InputAction.CallbackContext cb)
     {
         moveVector = Vector2.zero;
         if (anim != null)
             anim.Play(idle.name, 0);
     }
 
-    void Start()
+    protected void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
     }
 
-    private void FixedUpdate()
+    protected void FixedUpdate()
     {
         Vector2 rb2dVelocity = rb2d.velocity;
         Vector2 movement = Vector2.SmoothDamp(transform.position, (Vector2)transform.position + moveVector, ref rb2dVelocity, Time.fixedDeltaTime * movementSmoothingMultiplier);
         rb2d.MovePosition(movement);
     }
 
-    private void OnDestroy()
+    protected void OnDestroy()
     {
         movement.performed -= OnMovement;
         movement.canceled -= CancelMovement;
