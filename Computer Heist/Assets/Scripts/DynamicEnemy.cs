@@ -17,7 +17,7 @@ public class DynamicEnemy : MonoBehaviour
     public LayerMask playerLayerMask;
     public LayerMask viewLayerMask;
 
-    private Transform player = null;
+    private Transform player;
 
     [Header("PathFinder")]
     public int pathGridWidth;
@@ -54,7 +54,7 @@ public class DynamicEnemy : MonoBehaviour
     public float chaseMultiplier = 2f;
     public float stopDistance = 1.25f;
 
-    bool chasing = false;
+    bool chasing;
     bool stopMoving;
 
     [Header("Shooting")]
@@ -180,6 +180,8 @@ public class DynamicEnemy : MonoBehaviour
             nextNode = 0;
         }
 
+        //TODO: all these raycasts and overlap circles need optimization
+
         Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, viewRadius, playerLayerMask);
         for (int i = 0; i < players.Length; i++)
         {
@@ -268,14 +270,14 @@ public class DynamicEnemy : MonoBehaviour
 
     public void Alert(Vector2 position)
     {
-        if (chasing) //(searching && nextNode < path.Count)
+        if (chasing)
             return;
 
         patrolling = false;
         searching = true;
 
         path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(position));
-        if (path.Count > 1)
+        if (path != null && path.Count > 1)
             nextNode = 1;
         else
             nextNode = 0;
@@ -295,9 +297,6 @@ public class DynamicEnemy : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (patrolPoints.Count < 0)
-            return;
-
         if (showPath)
         {
             Gizmos.color = new Color(255f, 100f / 255f, 0f);
@@ -354,5 +353,14 @@ public class DynamicEnemy : MonoBehaviour
             stopMoving = false;
         else if (player == null)
             stopMoving = false;
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("dynamicEnemy") && !chasing && !searching)
+        {
+            nextNode = 1;
+            path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(Random.insideUnitCircle.normalized + (Vector2)transform.position));
+        }
     }
 }

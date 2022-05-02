@@ -36,7 +36,7 @@ public class Bullet : MonoBehaviour
 
             if (cols[i].gameObject.layer == 6)
             {
-                cols[i].GetComponent<SneakyPlayerMovement>().Damage();
+                cols[i].GetComponent<PlayerHealth>().Damage();
                 Destroy(gameObject);
             }
 
