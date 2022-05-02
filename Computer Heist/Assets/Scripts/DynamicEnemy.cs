@@ -1,11 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-using Unity.VisualScripting;
-
 using UnityEngine;
-
-using static UnityEngine.GraphicsBuffer;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class DynamicEnemy : MonoBehaviour
@@ -357,7 +353,7 @@ public class DynamicEnemy : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("dynamicEnemy") && !chasing && !searching)
+        if (collision.gameObject.CompareTag("dynamicEnemy") && !chasing)
         {
             nextNode = 1;
             path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(Random.insideUnitCircle.normalized + (Vector2)transform.position));
