@@ -61,8 +61,17 @@ public class DynamicEnemy : MonoBehaviour
     public Bullet bullet;
 
     float shootWaitTime;
+    bool aimed;
 
     Transform shootTarget;
+
+    [Header("Anims")]
+    public AnimationClip idle;
+    public AnimationClip walking;
+    public AnimationClip shooting;
+    public AnimationClip aim;
+
+    Animator animator;
 
     [Header("Debug")]
     public bool showPath = true;
@@ -74,26 +83,40 @@ public class DynamicEnemy : MonoBehaviour
     private void Awake()
     {
         finder = new PathFinder(pathGridWidth, pathGridHeight, wallLayerMask, pathGridOrigin);
+        animator = GetComponent<Animator>();
     }
 
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
         path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(patrolPoints[nextPatrolPoint]));
-        shootWaitTime = shootSpeed / 1.5f;
+        shootWaitTime = shootSpeed / 1.15f;
     }
 
     private void Update()
     {
+        if ((waiting || stopMoving) && shootTarget == null || (searching && !chasing && nextNode >= path.Count))
+            animator.Play(idle.name, 0);
+        else if (!(waiting || stopMoving))
+            animator.Play(walking.name, 0);
+
         if (player != null)
         {
-            if (Vector2.Distance(transform.position, player.position) <= stopDistance)
+            if (Vector2.Distance(transform.position, player.position) <= stopDistance && shootTarget != null)
+            {
                 stopMoving = true;
-            else if (stopMoving)
+                aimed = true;
+                animator.Play(aim.name, 0);
+            }
+            else if (Vector2.Distance(transform.position, player.position) >= shootRadius)
                 StartCoroutine(StartMoving());
+        } else
+        {
+            stopMoving = false;
+            aimed = false;
         }
 
-        if (shootTarget != null)
+        if (shootTarget != null && stopMoving)
         {
             if (shootWaitTime >= shootSpeed)
             {
@@ -157,6 +180,7 @@ public class DynamicEnemy : MonoBehaviour
         else if (searching && !chasing && nextNode >= path.Count)
         {
             searchWaitTime += Time.deltaTime;
+            animator.Play(idle.name, 0);
             if (searchWaitTime >= searchTime && !chasing)
             {
                 searching = false;
@@ -175,6 +199,11 @@ public class DynamicEnemy : MonoBehaviour
             path = finder.FindPath(finder.GetNode(transform.position), finder.GetNode(transform.position));
             nextNode = 0;
         }
+
+        if (!chasing && !waiting && path != null && nextNode < path.Count)
+            transform.up = -(path[nextNode].WorldPosition - (Vector2)transform.position);
+        else if (player != null && chasing)
+            transform.up = -(player.position - transform.position);
 
         //TODO: all these raycasts and overlap circles need optimization
 
@@ -209,6 +238,7 @@ public class DynamicEnemy : MonoBehaviour
                 player.GetComponent<SneakyPlayerMovement>().seen = false;
 
                 chasing = false;
+                aimed = false;
                 player = null;
                 shootTarget = null;
                 waiting = false;
@@ -223,6 +253,7 @@ public class DynamicEnemy : MonoBehaviour
                     break;
                 }
                 shootTarget = null;
+                aimed = false;
             }
 
             if (shootTarget == null)
@@ -285,6 +316,7 @@ public class DynamicEnemy : MonoBehaviour
         if (shootTarget == null)
             return;
 
+        animator.Play(shooting.name, 0);
         Bullet newBullet = Instantiate(bullet, (transform.position + (shootTarget.position - transform.position).normalized / 2f), transform.rotation);
         newBullet.transform.right = shootTarget.position - newBullet.transform.position;
         newBullet.bulletSpeed = shotVelocity;
@@ -344,11 +376,8 @@ public class DynamicEnemy : MonoBehaviour
 
     private IEnumerator StartMoving()
     {
-        yield return new WaitForSeconds(0.4f);
-        if (player != null && Vector2.Distance(transform.position, player.position) > stopDistance)
-            stopMoving = false;
-        else if (player == null)
-            stopMoving = false;
+        yield return new WaitForSeconds(0.1f);
+        stopMoving = false;
     }
 
     private void OnCollisionStay2D(Collision2D collision)
